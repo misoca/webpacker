@@ -19,7 +19,9 @@ class Webpacker::Compiler
   def compile
     if stale?
       record_compilation_digest
-      run_webpack
+      run_webpack.tap do |success|
+        remove_compilation_digest if !success
+      end
     else
       true
     end
@@ -64,6 +66,11 @@ class Webpacker::Compiler
       if status.success?
         logger.info "Compiled all packs in #{config.public_output_path}"
       else
+        logger.error "Compilation failed:\n#{sterr}\n#{stdout}"
+        File.open('/tmp/webpacker.log','a') do |io|
+          io.puts "Compilation failed:\n#{sterr}\n#{stdout}"
+        end
+
         logger.error "Compilation failed:\n#{sterr}\n#{stdout}"
       end
 
