@@ -19,9 +19,7 @@ class Webpacker::Compiler
   def compile
     if stale?
       record_compilation_digest
-      run_webpack.tap do |success|
-        remove_compilation_digest if !success
-      end
+      run_webpack
     else
       true
     end
